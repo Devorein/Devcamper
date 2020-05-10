@@ -21,21 +21,23 @@ mongoose.connect(process.env.MONGO_URI, {
 const bootcamps = JSON.parse(fs.readFileSync(`${__dirname}/_data/bootcamps.json`,'UTF-8'));
 
 // Import into db
-const importData = async()=>{
+const importData = async(exit=true)=>{
   try{
     await Bootcamp.create(bootcamps);
     console.log(`Bootcamps imported ...`.green.inverse);
-    process.exit();
+    if(exit)
+      process.exit();
   }catch(err){
     console.error(err);
   }
 }
 
-const deleteData = async()=>{
+const deleteData = async(exit=true)=>{
   try{
     await Bootcamp.deleteMany();
     console.log(`Bootcamps destroyed ...`.red.inverse);
-    process.exit();
+    if(exit)
+      process.exit();
   }catch(err){
     console.error(err);
   }
@@ -43,3 +45,10 @@ const deleteData = async()=>{
 
 if(process.argv[2] === "-i") importData();
 else if(process.argv[2] === "-d") deleteData();
+else if(process.argv[2] === "-b"){
+  (async()=>{
+    await deleteData(false);
+    await importData(false);
+    process.exit();
+  })();
+};
