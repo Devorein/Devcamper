@@ -11,7 +11,8 @@ const BootcampSchema = new mongoose.Schema(
 			unique: true,
 			trim: true,
 			maxlength: [50, 'Name can not be more than 50 characters']
-		},
+    },
+    _id: mongoose.Schema.ObjectId,
 		slug: String,
 		description: {
 			type: String,
