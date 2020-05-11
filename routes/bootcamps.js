@@ -6,9 +6,16 @@ const {
 	getBootcamp,
 	createBootcamp,
 	updateBootcamp,
-  deleteBootcamp,
-  getBootcampsInRadius
+	deleteBootcamp,
+	getBootcampsInRadius
 } = require('../controllers/bootcamps');
+
+// Include other resource routers
+
+const courseRouter = require('./courses');
+
+// Reroute into other resource router
+router.use('/:bootcampId/courses', courseRouter);
 
 router.route('/').get(getBootcamps).post(createBootcamp);
 
