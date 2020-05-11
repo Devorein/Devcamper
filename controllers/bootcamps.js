@@ -7,57 +7,57 @@ const geocoder = require('../utils/geocoder');
 // @route: GET /api/v1/bootcamps
 // @access: Public
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
-  let query;
+	let query;
 
-  const reqQuery = {...req.query};
+	const reqQuery = { ...req.query };
 
-  // Fields to exclude
-  const excludeFields = ['select','sort','page','limit'];
-  excludeFields.forEach(param=> delete reqQuery[param]);
+	// Fields to exclude
+	const excludeFields = [ 'select', 'sort', 'page', 'limit' ];
+	excludeFields.forEach((param) => delete reqQuery[param]);
 
-  let queryStr = JSON.stringify(reqQuery);
+	let queryStr = JSON.stringify(reqQuery);
 
-  // Create mongodb operators
-  queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g,match=>`$${match}`);
-  query = Bootcamp.find(JSON.parse(queryStr));
+	// Create mongodb operators
+	queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
+	query = Bootcamp.find(JSON.parse(queryStr));
 
-  // Getting the selected fields using projection
-  if(req.query.select){
-    const fields = req.query.select.split(",").join(" ");
-    query = query.select(fields);
-  }
+	// Getting the selected fields using projection
+	if (req.query.select) {
+		const fields = req.query.select.split(',').join(' ');
+		query = query.select(fields);
+	}
 
-  if(req.query.sort){
-    const sortBy = req.query.sort.split(",").join(" ");
-    query = query.sort(sortBy);
-  }else query = query.sort("-createdAt");
+	if (req.query.sort) {
+		const sortBy = req.query.sort.split(',').join(' ');
+		query = query.sort(sortBy);
+	} else query = query.sort('-createdAt');
 
-  // Pagination 
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const total = await Bootcamp.countDocuments();
+	// Pagination
+	const page = parseInt(req.query.page) || 1;
+	const limit = parseInt(req.query.limit) || 10;
+	const startIndex = (page - 1) * limit;
+	const endIndex = page * limit;
+	const total = await Bootcamp.countDocuments();
 
-  query = query.skip(startIndex).limit(limit);
+	query = query.skip(startIndex).limit(limit);
 
-  // Pagination result
-  const pagination = {};
-  if(endIndex < total){
-    pagination.next = {
-      page: page+1,
-      limit
-    }
-  }
+	// Pagination result
+	const pagination = {};
+	if (endIndex < total) {
+		pagination.next = {
+			page: page + 1,
+			limit
+		};
+	}
 
-  if(startIndex > 0){
-    pagination.prev = {
-      page: page-1,
-      limit
-    }
-  }
+	if (startIndex > 0) {
+		pagination.prev = {
+			page: page - 1,
+			limit
+		};
+	}
 
-  const bootcamps = await query;
+	const bootcamps = await query;
 	res.status(200).json({ success: true, count: bootcamps.length, pagination, data: bootcamps });
 });
 
@@ -96,24 +96,23 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
 	res.status(200).json({ success: true, data: bootcamp });
 });
 
-
 // @desc: Get bootcamps within a radius
 // @route: GET /api/v1/bootcamps/radius/:zipcode/:distance
 // @access: Private
 exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
-  const {zipcode,distance} = req.params;
-  
-  // get lat/long from geocoder
-  const [loc] = await geocoder.geocode(zipcode);
-  const {latitude,longitude} = loc;
+	const { zipcode, distance } = req.params;
 
-  // calc radius using radians
-  // Divide distance by radius of earth
-  const radius = distance / 3963;
-  const bootcamps = await Bootcamp.find({
-    location: {
-      $geoWithin: {$centerSphere :[[longitude,latitude],radius]}
-    }
-  });
-  res.status(200).json({success: true,count: bootcamps.length, data: bootcamps});
+	// get lat/long from geocoder
+	const [ loc ] = await geocoder.geocode(zipcode);
+	const { latitude, longitude } = loc;
+
+	// calc radius using radians
+	// Divide distance by radius of earth
+	const radius = distance / 3963;
+	const bootcamps = await Bootcamp.find({
+		location: {
+			$geoWithin: { $centerSphere: [ [ longitude, latitude ], radius ] }
+		}
+	});
+	res.status(200).json({ success: true, count: bootcamps.length, data: bootcamps });
 });
