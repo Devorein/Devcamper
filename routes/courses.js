@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 const Course = require('../models/Course');
 const advancedResults = require('../middleware/advancedResults');
+const { protect } = require('../middleware/auth');
 
 const { getCourses, getCourse, createCourse, updateCourse, deleteCourse } = require('../controllers/courses');
 
@@ -14,7 +15,7 @@ router
 		}),
 		getCourses
 	)
-	.post(createCourse);
-router.route('/:id').get(getCourse).put(updateCourse).delete(deleteCourse);
+	.post(protect, createCourse);
+router.route('/:id').get(getCourse).put(protect, updateCourse).delete(protect, deleteCourse);
 
 module.exports = router;
