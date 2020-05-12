@@ -26,8 +26,6 @@ const app = express();
 // Body parser
 app.use(express.json());
 
-app.use(cookieParser);
-
 // Dev loggin middleware
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
@@ -42,6 +40,8 @@ app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
 app.use('/api/v1/auth', auth);
 app.use(errorHandler);
+
+app.use(cookieParser);
 
 const { PORT = 5000 } = process.env;
 
