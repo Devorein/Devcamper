@@ -38,6 +38,11 @@ UserSchema.methods.getSignedJwtToken = function() {
 	});
 };
 
+// Match user entered password to hashed pass in db
+UserSchema.methods.matchPassword = async function(enteredPass) {
+	return await bcrypt.compare(enteredPass, this.password);
+};
+
 // Encrypt password using bcrypt
 UserSchema.pre('save', async function(next) {
 	const salt = await bcrypt.genSalt(10);
